@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudOps Monitor Lite</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login Screen Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-card">
+            <div class="brand" style="justify-content: center; margin-bottom: 12px;">
+                <div class="brand-icon">⚡</div>
+                <span class="brand-text" style="font-size: 1.4rem;">CloudOps Lite</span>
+            </div>
+            <h2 style="text-align: center; margin-bottom: 6px;">Sign In</h2>
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
+                Enter your PipeOps credentials to continue
+            </p>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" value="admin@pipeops.io" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" value="••••••••" required>
+                </div>
+                <button type="submit" class="action-btn primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+                    Access Infrastructure
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">⚡</div>
+                <span class="brand-text">CloudOps Lite</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-tab="dashboard"><a href="#"><span>📊</span><span class="nav-text">Dashboard</span></a></li>
+                <li class="nav-item" data-tab="servers"><a href="#"><span>🖥️</span><span class="nav-text">Servers</span></a></li>
+                <li class="nav-item" data-tab="containers"><a href="#"><span>🐳</span><span class="nav-text">Containers</span></a></li>
+                <li class="nav-item" data-tab="logs"><a href="#"><span>📜</span><span class="nav-text">Logs</span></a></li>
+                <li class="nav-item" data-tab="alerts"><a href="#"><span>🔔</span><span class="nav-text">Alerts</span></a></li>
+                <li class="nav-item" onclick="handleLogout()"><a href="#"><span>🚪</span><span class="nav-text">Sign Out</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="search-bar">
+                    <span>🔍</span>
+                    <input type="text" id="global-search" placeholder="Search servers, containers, logs...">
+                </div>
+                <div class="header-controls">
+                    <small id="last-updated" style="color: var(--text-muted); font-size: 0.8rem;">Syncing live...</small>
+                    <button class="icon-btn" id="theme-toggle" title="Toggle Theme">🌙</button>
+                    <button class="icon-btn" id="toast-demo" title="Notifications">
+                        🔔
+                        <span class="status-dot online"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                
+                <!-- VIEW 1: DASHBOARD -->
+                <div id="view-dashboard" class="tab-view active">
+                    <section class="grid-cards">
+                        <div class="card">
+                            <div class="card-header">
+                                <span>System Status</span>
+                                <span class="badge badge-success">Online</span>
+                            </div>
+                            <div class="card-value" style="color: var(--success)">99.98%</div>
+                            <small style="color: var(--text-muted)">Uptime: 14d 06h 32m</small>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span>CPU Usage</span><span>⚡</span></div>
+                            <div class="card-value" id="val-cpu">42%</div>
+                            <div class="progress-bar"><div class="progress-fill" id="fill-cpu" style="width: 42%"></div></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span>RAM Memory</span><span>🧠</span></div>
+                            <div class="card-value" id="val-mem">52%</div>
+                            <div class="progress-bar"><div class="progress-fill warning" id="fill-mem" style="width: 52%"></div></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><span>Disk Space</span><span>💾</span></div>
+                            <div class="card-value" id="val-disk">41%</div>
+                            <div class="progress-bar"><div class="progress-fill" id="fill-disk" style="width: 41%"></div></div>
+                        </div>
+                    </section>
+
+                    <section class="grid-charts" style="margin-top: 24px;">
+                        <div class="chart-card">
+                            <h3>Realtime CPU Utilization (%)</h3>
+                            <div class="chart-container" id="cpu-chart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Realtime Memory Load (%)</h3>
+                            <div class="chart-container" id="memory-chart"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- VIEW 2: SERVERS MANAGEMENT -->
+                <div id="view-servers" class="tab-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3>Managed Server Nodes</h3>
+                        <button class="action-btn primary" id="btn-add-server">+ Provision New Server</button>
+                    </div>
+                    <div class="grid-cards" id="server-nodes-grid"></div>
+                </div>
+
+                <!-- VIEW 3: DOCKER CONTAINERS -->
+                <div id="view-containers" class="tab-view">
+                    <h3 style="margin-bottom: 16px;">Active Container Instances</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Container ID</th>
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Status</th>
+                                    <th>CPU Load</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="container-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: SYSTEM LOGS CONSOLE -->
+                <div id="view-logs" class="tab-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3>Live Console Logs</h3>
+                        <div>
+                            <button class="action-btn" onclick="Utils.clearLogs()">Clear Console</button>
+                            <button class="action-btn primary" onclick="Utils.triggerLogSimulation()">Simulate Event</button>
+                        </div>
+                    </div>
+                    <div class="log-viewer" id="log-viewer"></div>
+                </div>
+
+                <!-- VIEW 5: ALERTS & INCIDENTS -->
+                <div id="view-alerts" class="tab-view">
+                    <h3 style="margin-bottom: 16px;">System Alerts & Trigger Rules</h3>
+                    <div id="alerts-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
